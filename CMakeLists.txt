@@ -5,15 +5,17 @@ set_property ( GLOBAL PROPERTY USE_FOLDERS ON )
 
 project ( OilLib )
 
-set ( OILLIB_MAJOR_VERSION 0 CACHE STRING "OilLib Library major version number." FORCE )
-set ( OILLIB_MINOR_VERSION 0 CACHE STRING "OilLib Library minor version number." FORCE )
-set ( OILLIB_PATCH_VERSION 1 CACHE STRING "OilLib Library patch version number." FORCE )
+set ( OILLIB_MAJOR_VERSION 0 CACHE STRING "OilLib major version number." FORCE )
+set ( OILLIB_MINOR_VERSION 0 CACHE STRING "OilLib minor version number." FORCE )
+set ( OILLIB_PATCH_VERSION 1 CACHE STRING "OilLib patch version number." FORCE )
 set ( OILLIB_VERSION_STRING "${OILLIB_MAJOR_VERSION}.${OILLIB_MINOR_VERSION}.${OILLIB_PATCH_VERSION}" )
 
 
 # ######### General setup ##########
 
 option ( BUILD_SHARED_LIBS "Build shared libraries." OFF )
+option ( CREATE_CSHARP_API_TARGET "Whether to provide a target for generating the C# API" ON )
+option ( CREATE_PHP5_API_TARGET   "Whether to provide a target for generating the PHP5 API" ON )
 option ( CREATE_PYTHON_API_TARGET "Whether to provide a target for generating the Python API" ON )
 #option ( BUILD_TESTS "Whether tests should be included in the makefile." ON )
 #option ( BUILD_EXAMPLES "Whether examples should be included in the makefile." ON )
@@ -43,14 +45,12 @@ else ()
     unset ( OILLIB_SHARED_BUILD )
 endif ()
 
+list ( APPEND CMAKE_MODULE_PATH "${PROJECT_TOP_DIR}/cmake" )
 
 # ######### Gather all the sources  ##########
 
 configure_file ( ${OILLIB_INC_DIR}/config.hpp.in ${OILLIB_INC_DIR}/config.hpp )
 
-set ( OILLIB_SOURCES 
-    ${OILLIB_SRC_DIR}/hello.cpp
-)
 set ( OILLIB_PUBLIC_HEADERS
     ${OILLIB_INC_DIR}/config.hpp
     ${OILLIB_INC_DIR}/hello.hpp
@@ -58,6 +58,9 @@ set ( OILLIB_PUBLIC_HEADERS
 set ( OILLIB_PRIVATE_HEADERS 
 )
 set ( OILLIB_HEADERS ${OILLIB_PUBLIC_HEADERS} ${OILLIB_PRIVATE_HEADERS} )
+set ( OILLIB_SOURCES 
+    ${OILLIB_SRC_DIR}/hello.cpp
+)
 set ( OILLIB_ALL_SOURCES ${OILLIB_HEADERS} ${OILLIB_SOURCES} )
 
 # interface for SWIG
@@ -81,30 +84,65 @@ set_target_properties ( OilLib PROPERTIES
 
 # ######### Create the API  ##########
 
-set ( MODULE_NAME oil )
+add_custom_target ( API COMMENT "Building API." )
+
+set ( MODULE_NAME oillib )
 
 find_package ( SWIG REQUIRED )
-include ( ${SWIG_USE_FILE} )
+include ( cmake/UseSWIG.cmake )
 
 set ( CMAKE_SWIG_FLAGS "-c++" )
+# write .py, .php, etc in the lib dir
+set ( CMAKE_SWIG_OUTDIR "${OILLIB_LIB_DIR}" )
 
 # see http://www.cmake.org/Wiki/CMake_FAQ#How_do_I_use_CMake_to_generate_SWIG_wrapper_libraries.3F
 set_source_files_properties ( ${OILLIB_INTERFACE_FILES} PROPERTIES CPLUSPLUS ON )
 set_source_files_properties ( ${OILLIB_INTERFACE_FILES} PROPERTIES CMAKE_SWIG_FLAGS "-c++" )
 
 
+#######################################
+
+
+#
+# - per target include dirs
+#
+function ( add_incs_to_target targetName incs )
+    if ( UNIX )
+      set ( iopt "-I" )
+    elseif ( WIN32 )
+      set ( iopt "/I" )
+    endif ( UNIX )
+  foreach ( i ${incs} )
+    set ( iflags "${iflags} ${iopt}${i}" )
+  endforeach ( i )
+  set_target_properties ( ${targetName} PROPERTIES
+    COMPILE_FLAGS "${iflags}"
+  )
+endfunction ( add_incs_to_target )
+
+
+# PHP5 -------------------------
+
+if ( CREATE_PHP5_API_TARGET )
+  find_package ( PHP5 REQUIRED )
+  set ( apiName "${MODULE_NAME}_php" )
+  swig_add_module ( ${apiName} php ${OILLIB_INTERFACE_FILES} ${OILLIB_SOURCE_FILES} )
+  add_incs_to_target ( ${apiName} ${PHP5_INCLUDE_PATH} )
+#  set_target_properties ( ${apiName} PROPERTIES EXCLUDE_FROM_ALL 1 )
+  add_dependencies ( API ${apiName} )
+endif ( CREATE_PHP5_API_TARGET )
+
+
 # Python -------------------------
 
 if ( CREATE_PYTHON_API_TARGET )
-
   find_package ( PythonLibs REQUIRED )
-
   set ( apiName "${MODULE_NAME}_python" )
-
-  include_directories ( ${PYTHON_INCLUDE_PATH} )
-  swig_add_module ( ${apiName} python ${OILLIB_INTERFACE_FILES} ${OILLIB_SOURCES} )
+  swig_add_module ( ${apiName} python ${OILLIB_INTERFACE_FILES} )
   swig_link_libraries ( ${apiName} ${PYTHON_LIBRARIES} )
-
+  set ( apiName "_${apiName}" )
+  add_incs_to_target ( ${apiName} ${PYTHON_INCLUDE_PATH} )
+#  set_target_properties ( ${apiName} PROPERTIES EXCLUDE_FROM_ALL 1 )
+  add_dependencies ( API ${apiName} )
 endif ( CREATE_PYTHON_API_TARGET )
-
 
