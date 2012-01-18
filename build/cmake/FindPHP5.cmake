@@ -29,11 +29,12 @@ FIND_PATH(PHP5_FOUND_INCLUDE_PATH main/php.h
   ${PHP5_POSSIBLE_INCLUDE_PATHS})
 
 IF(PHP5_FOUND_INCLUDE_PATH)
-  SET(php5_paths "${PHP5_POSSIBLE_INCLUDE_PATHS}")
-  FOREACH(php5_path Zend main TSRM)
-    SET(php5_paths ${php5_paths} "${PHP5_FOUND_INCLUDE_PATH}/${php5_path}")
-  ENDFOREACH(php5_path Zend main TSRM)
-  SET(PHP5_INCLUDE_PATH "${php5_paths}" INTERNAL "PHP5 include paths")
+  SET(paths "${PHP5_FOUND_INCLUDE_PATH}")
+  SET(subdirs  ext Zend main TSRM)
+  FOREACH(p ${subdirs})
+    LIST(APPEND paths "${PHP5_FOUND_INCLUDE_PATH}/${p}")
+  ENDFOREACH()
+  SET(PHP5_INCLUDE_PATH "${paths}")
 ENDIF(PHP5_FOUND_INCLUDE_PATH)
 
 FIND_PROGRAM(PHP5_EXECUTABLE NAMES php5 php )

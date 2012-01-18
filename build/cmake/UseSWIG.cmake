@@ -111,7 +111,8 @@ MACRO(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
       IF(swig_source_file_generated)
         SET(swig_source_file_fullname "${CMAKE_CURRENT_BINARY_DIR}/${infile}")
       ELSE(swig_source_file_generated)
-        SET(swig_source_file_fullname "${CMAKE_CURRENT_SOURCE_DIR}/${infile}")
+#        SET(swig_source_file_fullname "${CMAKE_CURRENT_SOURCE_DIR}/${infile}")
+        SET(swig_source_file_fullname "${infile}")
       ENDIF(swig_source_file_generated)
     ENDIF(${swig_source_file_path} MATCHES "^${CMAKE_CURRENT_BINARY_DIR}")
   ENDIF(${swig_source_file_path} MATCHES "^${CMAKE_CURRENT_SOURCE_DIR}")
@@ -151,8 +152,8 @@ MACRO(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
       "${swig_generated_file_fullname}.c")
   ENDIF(swig_source_file_cplusplus)
 
-  #MESSAGE("Full path to source file: ${swig_source_file_fullname}")
-  #MESSAGE("Full path to the output file: ${swig_generated_file_fullname}")
+  #MESSAGE(STATUS "Full path to source file: ${swig_source_file_fullname}")
+  #MESSAGE(STATUS "Full path to the output file: ${swig_generated_file_fullname}")
   GET_DIRECTORY_PROPERTY(cmake_include_directories INCLUDE_DIRECTORIES)
   SET(swig_include_dirs)
   FOREACH(it ${cmake_include_directories})
@@ -170,6 +171,8 @@ MACRO(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
   ENDIF(SWIG_MODULE_${name}_EXTRA_FLAGS)
   ADD_CUSTOM_COMMAND(
     OUTPUT "${swig_generated_file_fullname}" ${swig_extra_generated_files}
+    # Let's create the ${swig_outdir} at execution time, in case dir contains $(OutDir)
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${swig_outdir}
     COMMAND "${SWIG_EXECUTABLE}"
     ARGS "-${SWIG_MODULE_${name}_SWIG_LANGUAGE_FLAG}"
     ${swig_source_file_flags}
@@ -188,6 +191,8 @@ MACRO(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
   SET(${outfiles} "${swig_generated_file_fullname}" ${swig_extra_generated_files})
 ENDMACRO(SWIG_ADD_SOURCE_TO_MODULE)
 
+
+#-------------------------------------------------------------------
 #
 # Create Swig module
 #
@@ -202,15 +207,12 @@ MACRO(SWIG_ADD_MODULE name language)
       SET(swig_other_sources ${swig_other_sources} "${it}")
     ENDIF()
   ENDFOREACH(it)
-message ( STATUS "aqui 1: swig_dot_i_sources=${swig_dot_i_sources}" )
-message ( STATUS "aqui 1: swig_other_sources=${swig_other_sources}" )
 
   SET(swig_generated_sources)
   FOREACH(it ${swig_dot_i_sources})
     SWIG_ADD_SOURCE_TO_MODULE(${name} swig_generated_source ${it})
     SET(swig_generated_sources ${swig_generated_sources} "${swig_generated_source}")
   ENDFOREACH(it)
-message ( STATUS "aqui 1: swig_generated_sources=${swig_generated_sources}" )
   GET_DIRECTORY_PROPERTY(swig_extra_clean_files ADDITIONAL_MAKE_CLEAN_FILES)
   SET_DIRECTORY_PROPERTIES(PROPERTIES
     ADDITIONAL_MAKE_CLEAN_FILES "${swig_extra_clean_files};${swig_generated_sources}")
