@@ -28,6 +28,7 @@ SET(MONO_FOUND FALSE)
 FIND_PROGRAM(MONO_EXECUTABLE mono)
 FIND_PROGRAM(MCS_EXECUTABLE  mcs)    # 1.0
 FIND_PROGRAM(GMCS_EXECUTABLE mono-csc gmcs)  # 2.0
+FIND_PROGRAM(DMCS_EXECUTABLE dmcs)  # 2.0
 FIND_PROGRAM(SMCS_EXECUTABLE smcs)  # Moonlight
 # mono-gac: /usr/bin/gacutil
 FIND_PROGRAM(GACUTIL_EXECUTABLE gacutil)  # gacutil - Global Assembly Cache management utility.
@@ -38,14 +39,16 @@ FIND_PROGRAM(SN_EXECUTABLE sn)  #  sn - Digitally sign/verify/compare strongname
 
 # We decide to declare mono found when both interpreter and compiler 1.0 are found.
 IF(MONO_EXECUTABLE AND MCS_EXECUTABLE)
-SET(MONO_FOUND TRUE)
-# TODO get version
-# TODO: there are multiple 'mcs' command on unix, need to check this is Mono:
-# mcs --version should return "Mono C# compiler version 1.9.1.0"
+  SET(MONO_FOUND TRUE)
+  # TODO get version
+  # TODO: there are multiple 'mcs' command on unix, need to check this is Mono:
+  # mcs --version should return "Mono C# compiler version 1.9.1.0"
 ELSEIF(MONO_EXECUTABLE AND GMCS_EXECUTABLE)
-SET(MONO_FOUND TRUE)
+  SET(MONO_FOUND TRUE)
 ELSEIF(MONO_EXECUTABLE AND SMCS_EXECUTABLE)
-SET(MONO_FOUND TRUE)
+  SET(MONO_FOUND TRUE)
+ELSEIF(MONO_EXECUTABLE AND DMCS_EXECUTABLE)
+  SET(MONO_FOUND TRUE)
 ENDIF(MONO_EXECUTABLE AND MCS_EXECUTABLE)
 
 IF(NOT MONO_FOUND)
