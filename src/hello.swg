@@ -1,4 +1,4 @@
-%module oillib
+%module oil
 %{
 #include "hello.hpp"
 %}

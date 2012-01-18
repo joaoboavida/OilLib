@@ -4,19 +4,19 @@
 # This file illustrates the proxy class C++ interface generated
 # by SWIG.
 
-import oillib 
+import oil
 
 # ----- Object creation -----
 
 print "Creating some objects:"
-c = oillib.Circle(10)
+c = oil.Circle(10)
 print "    Created circle", c
-s = oillib.Square(10)
+s = oil.Square(10)
 print "    Created square", s
 
 # ----- Access a static member -----
 
-print "\nA total of", oillib.cvar.Shape_nshapes,"shapes were created"
+print "\nA total of", oil.cvar.Shape_nshapes,"shapes were created"
 
 # ----- Member data access -----
 
@@ -47,6 +47,6 @@ del c
 del s
 
 s = 3
-print oillib.cvar.Shape_nshapes,"shapes remain"
+print oil.cvar.Shape_nshapes,"shapes remain"
 print "Goodbye"
 
