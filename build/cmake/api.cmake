@@ -1,5 +1,6 @@
 # ######### Create the API  ##########
 
+# many of the cmake find files were taken from gdcm, http://sourceforge.net/projects/gdcm/
 
 option ( BUILD_API_ADD_TO_ALL "Whether the API should be built by default" OFF )
 option ( BUILD_API_CSHARP "Whether to provide a target for generating the C# API" ON )
