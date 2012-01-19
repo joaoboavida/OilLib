@@ -34,7 +34,7 @@ endif ()
 
 if ( BUILD_API_CSHARP )
   find_package ( CSharp REQUIRED )
-  set ( apiName "${MODULE_NAME}" )
+  set ( apiName "api_csharp" )
   set ( CMAKE_SWIG_OUTDIR "${OILLIB_SWIG_OUTDIR}/cs" )
   file ( MAKE_DIRECTORY ${CMAKE_SWIG_OUTDIR} )
   swig_add_module ( ${apiName} CSharp ${OILLIB_INTERFACE_FILES} ${OILLIB_SOURCE_FILES} )
@@ -44,6 +44,7 @@ if ( BUILD_API_CSHARP )
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_SWIG_OUTDIR}"
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SWIG_OUTDIR}"
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SWIG_OUTDIR}"
+    OUTPUT_NAME oil
   )
   target_link_libraries ( ${apiName} OilLib )
   add_dependencies ( API ${apiName} )
@@ -54,7 +55,7 @@ endif ()
 
 if ( BUILD_API_PHP5 )
   find_package ( PHP5 REQUIRED )
-  set ( apiName "${MODULE_NAME}" )
+  set ( apiName "api_php5" )
   set ( CMAKE_SWIG_OUTDIR "${OILLIB_SWIG_OUTDIR}/php5" )
   file ( MAKE_DIRECTORY ${CMAKE_SWIG_OUTDIR} )
   swig_add_module ( ${apiName} php ${OILLIB_INTERFACE_FILES} ${OILLIB_SOURCE_FILES} )
@@ -64,6 +65,7 @@ if ( BUILD_API_PHP5 )
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_SWIG_OUTDIR}"
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SWIG_OUTDIR}"
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SWIG_OUTDIR}"
+    OUTPUT_NAME oil
   )
   target_link_libraries ( ${apiName} OilLib )
   add_dependencies ( API ${apiName} )
@@ -74,10 +76,10 @@ endif ()
 
 if ( BUILD_API_PYTHON )
   find_package ( PythonLibs REQUIRED )
-  set ( apiName "${MODULE_NAME}" )
+  set ( apiName "api_python" )
   set ( CMAKE_SWIG_OUTDIR "${OILLIB_SWIG_OUTDIR}/python" )
   file ( MAKE_DIRECTORY ${CMAKE_SWIG_OUTDIR} )
-  swig_add_module ( ${apiName} python ${OILLIB_INTERFACE_FILES} )
+  swig_add_module ( ${apiName} python ${OILLIB_INTERFACE_FILES} ${OILLIB_SOURCE_FILES} )
   swig_link_libraries ( ${apiName} ${PYTHON_LIBRARIES} )
   set ( apiName "_${apiName}" )
   add_incs_to_target ( ${apiName} "${PYTHON_INCLUDE_PATH}" )
@@ -86,6 +88,7 @@ if ( BUILD_API_PYTHON )
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_SWIG_OUTDIR}"
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SWIG_OUTDIR}"
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SWIG_OUTDIR}"
+    OUTPUT_NAME _oil
   )
   target_link_libraries ( ${apiName} OilLib )
   add_dependencies ( API ${apiName} )
