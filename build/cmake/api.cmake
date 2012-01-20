@@ -12,19 +12,15 @@ option ( BUILD_API_PYTHON "Whether to provide a target for generating the Python
 
 add_custom_target ( API COMMENT "Building API." )
 
-set ( MODULE_NAME oil )
-
 find_package ( SWIG REQUIRED )
 include ( UseSWIG.cmake )
 
-set ( CMAKE_SWIG_FLAGS "-c++" )
 # write .py, .php, etc in the lib dir
 set ( OILLIB_SWIG_OUTDIR "${OILLIB_LIB_DIR}" )
 include_directories( "${OILLIB_LIB_DIR}" )
 
 # see http://www.cmake.org/Wiki/CMake_FAQ#How_do_I_use_CMake_to_generate_SWIG_wrapper_libraries.3F
 set_source_files_properties ( ${OILLIB_INTERFACE_FILES} PROPERTIES CPLUSPLUS ON )
-set_source_files_properties ( ${OILLIB_INTERFACE_FILES} PROPERTIES CMAKE_SWIG_FLAGS "-c++" )
 
 if ( API_ADD_TO_ALL )
   add_dependencies ( all API )
