@@ -1,4 +1,3 @@
-#######################################
 
 
 #
@@ -17,5 +16,4 @@ function ( add_incs_to_target targetName )
     COMPILE_FLAGS "${iflags}"
   )
 endfunction ( add_incs_to_target )
-
 

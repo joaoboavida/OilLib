@@ -266,3 +266,83 @@ MACRO(SWIG_LINK_LIBRARIES name)
   ENDIF(SWIG_MODULE_${name}_REAL_NAME)
 ENDMACRO(SWIG_LINK_LIBRARIES name)
 
+
+# ---------------------------------------------------------------------------
+#
+# returns the leftmost portion of the path common to both files
+#
+function ( swig_find_common_path var file1 file2 )
+  swig_get_path_as_list ( path1 ${file1} )
+  swig_get_path_as_list ( path2 ${file2} )
+
+  list ( LENGTH path1 l1 )
+  list ( LENGTH path2 l2 )
+  swig_max ( size ${l1} ${l2} )
+
+  set ( com )
+  while ( size GREATER 0 )
+    list ( GET path1 0 name1 )
+    list ( GET path2 0 name2 )
+    if ( name1 STREQUAL name2 )
+      list ( APPEND com ${name1} )
+      list ( REMOVE_AT path1 0 )
+      list ( REMOVE_AT path2 0 )
+    else ()
+      break ()
+    endif ()
+    math ( EXPR size "${size} - 1" ) # decrement size
+  endwhile ()
+
+  # revert the list to a path
+  list ( LENGTH com len )
+  if ( len GREATER 0 )
+    list ( REVERSE com )
+    list ( GET com 0 last )
+    string ( REGEX MATCH "^.*${last}" com ${file1} )
+    set ( ${var} ${com} PARENT_SCOPE )
+  else ()
+    set ( ${var} ${com} PARENT_SCOPE )
+  endif ()
+
+endfunction ()
+
+
+
+# ---------------------------------------------------------------------------
+#
+# parses a path and puts its dirs a list left-to-right
+#
+function ( swig_get_path_as_list listvar file )
+  get_filename_component ( path ${file} REALPATH )
+  get_filename_component ( name ${path} NAME )
+  get_filename_component ( path ${path} PATH )
+  set ( lv "${name}" )
+  get_filename_component ( lastName ${path} NAME )
+#  message ( STATUS "${path} -------- ${name},${lastName} ---------- ${lv}" )
+  while  ( NOT "${name}" STREQUAL "${lastName}")
+    get_filename_component ( name ${path} NAME )
+    list ( APPEND lv "${name}" )
+    get_filename_component ( path ${path} PATH )
+    get_filename_component ( lastName ${path} NAME )
+#    message ( STATUS "${path} -------- ${name},${lastName} ---------- ${lv}" )
+  endwhile ()
+  list ( REVERSE lv )
+  set ( ${listvar} ${lv} PARENT_SCOPE )
+endfunction ()
+
+
+
+# ---------------------------------------------------------------------------
+#
+# returns the max of two args
+#
+function ( swig_max maxvar v1 v2 )
+  if ( v1 GREATER v2 OR v1 EQUAL v2 )
+    set ( m ${v1} PARENT_SCOPE )
+  else ()
+    set ( m ${v2})
+  endif ()
+  set ( ${maxvar} ${m} PARENT_SCOPE )
+endfunction ()
+
+

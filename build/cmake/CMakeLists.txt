@@ -87,3 +87,4 @@ set_target_properties ( OilLib PROPERTIES
 if ( BUILD_API )
   include ( api.cmake )
 endif ()
+
