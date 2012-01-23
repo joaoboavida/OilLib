@@ -90,7 +90,8 @@ if ( BUILD_API_PYTHON )
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_SWIG_OUTDIR}"
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SWIG_OUTDIR}"
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SWIG_OUTDIR}"
-    OUTPUT_NAME _oil
+    OUTPUT_NAME oil
+    PREFIX "_"  # name it as _oil.so (linux)
     COMMENT "API was put into ${CMAKE_SWIG_OUTDIR}"
   )
   target_link_libraries ( ${apiName} OilLib )
@@ -114,7 +115,7 @@ if ( BUILD_API_RUBY )
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SWIG_OUTDIR}"
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SWIG_OUTDIR}"
     OUTPUT_NAME oil
-    PREFIX ""             # the ruby extension is named extension.so, not libextension.so
+    PREFIX "" # name it as oil.so (linux)
     COMMENT "API was put into ${CMAKE_SWIG_OUTDIR}"
   )
   target_link_libraries ( ${apiName} OilLib )
