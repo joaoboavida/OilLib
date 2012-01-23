@@ -79,12 +79,13 @@ set_target_properties ( OilLib PROPERTIES
    VERSION ${OILLIB_VERSION_STRING}
    DEFINE_SYMBOL OILLIB_EXPORTS                  # for dllexport/dllimport decorations
    PUBLIC_HEADER "${OILLIB_PUBLIC_HEADERS}"
-   OUTPUT_NAME "oil++"
+   OUTPUT_NAME "oil"
 )
 
 # ######### Create the API  ##########
 
 if ( BUILD_API )
+  option ( BUILD_SHARED_LIBS "Build shared libraries." ON )
   include ( api.cmake )
   swig_create_api ( NAME oil
                     OUTDIR ${OILLIB_LIB_DIR}
