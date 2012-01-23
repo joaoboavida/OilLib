@@ -86,5 +86,10 @@ set_target_properties ( OilLib PROPERTIES
 
 if ( BUILD_API )
   include ( api.cmake )
+  swig_create_api ( NAME oil
+                    OUTDIR ${OILLIB_LIB_DIR}
+                    INTERFACE_FILES ${OILLIB_INTERFACE_FILES}
+                    SOURCE_FILES ${OILLIB_SOURCES}
+                    ADDITIONAL_LIBS OilLib )
 endif ()
 
