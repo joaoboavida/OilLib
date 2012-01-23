@@ -2,7 +2,6 @@
 cmake_minimum_required ( VERSION 2.6 )
 cmake_policy ( SET CMP0015 OLD ) # link_directories() relative path handling
 set_property ( GLOBAL PROPERTY USE_FOLDERS ON )
-include ( macros.cmake )
 
 project ( OilLib )
 
@@ -85,8 +84,7 @@ set_target_properties ( OilLib PROPERTIES
 # ######### Create the API  ##########
 
 if ( BUILD_API )
-  option ( BUILD_SHARED_LIBS "Build shared libraries." ON )
-  include ( api.cmake )
+  include ( SwigCreateApi.cmake )
   swig_create_api ( NAME oil
                     OUTDIR ${OILLIB_LIB_DIR}
                     INTERFACE_FILES ${OILLIB_INTERFACE_FILES}

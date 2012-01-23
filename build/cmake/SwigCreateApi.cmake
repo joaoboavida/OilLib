@@ -1,8 +1,8 @@
-# ######### Create the API  ##########
+
+# ######### Utilities to create an API using SWIG  ##########
 
 find_package ( SWIG REQUIRED )
 include ( UseSWIG.cmake )
-include ( CMakeParseArguments )
 
 option ( BUILD_API_ADD_TO_ALL "Whether the API should be built by default" OFF )
 
@@ -11,15 +11,16 @@ option ( BUILD_API_PHP5 "Whether to provide a target for generating the PHP5 API
 option ( BUILD_API_PYTHON "Whether to provide a target for generating the Python API" ON )
 option ( BUILD_API_RUBY "Whether to provide a target for generating the Ruby API" ON )
 
+include ( CMakeParseArguments )
 
 #===========================================
 
 #
 # SWIG_CREATE_API ( NAME name
 #                   OUTDIR dir
-#                   INTERFACE_FILES file1 file2 ...
-#                   SOURCE_FILES file1 file2 ...
-#                   ADDITIONAL_LIBS lib1 lib2
+#                   INTERFACE_FILES file1.swg file2.swg ...
+#                   SOURCE_FILES file1.hpp file2.cpp ...
+#                   ADDITIONAL_LIBS lib1target lib2target
 #                 )
 #
 macro ( swig_create_api )
@@ -122,7 +123,6 @@ macro ( swig_create_api )
     set ( CMAKE_SWIG_OUTDIR "${SWGCA_OUTDIR}/ruby" )
     file ( MAKE_DIRECTORY ${CMAKE_SWIG_OUTDIR} )
     swig_add_module ( ${apiName} ruby ${SWGCA_INTERFACE_FILES} ${SWGCA_SOURCE_FILES} )
-    swig_link_libraries ( ${apiName} ${RUBY_LIBRARY} )
     add_incs_to_target ( ${apiName} "${RUBY_INCLUDE_DIRS}" )
     set_target_properties ( ${apiName} PROPERTIES
       EXCLUDE_FROM_ALL 1
@@ -138,4 +138,25 @@ macro ( swig_create_api )
   endif ()
 
 endmacro ( swig_create_api )
+
+
+
+#===========================================
+
+#
+# - add per target include dirs
+#
+function ( add_incs_to_target targetName )
+  if ( UNIX )
+    set ( iopt "-I" )
+  elseif ( WIN32 )
+    set ( iopt "/I" )
+  endif ( UNIX )
+  foreach ( i ${ARGV} )
+    set ( iflags "${iflags} ${iopt}${i}" )
+  endforeach ( i )
+  set_target_properties ( ${targetName} PROPERTIES
+    COMPILE_FLAGS "${iflags}"
+  )
+endfunction ( add_incs_to_target )
 
