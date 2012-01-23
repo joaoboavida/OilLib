@@ -2,7 +2,7 @@
 # ######### Utilities to create an API using SWIG  ##########
 
 find_package ( SWIG REQUIRED )
-include ( UseSWIG.cmake )
+include ( ${CMAKE_CURRENT_SOURCE_DIR}/UseSWIG.cmake )
 
 option ( BUILD_API_ADD_TO_ALL "Whether the API should be built by default" OFF )
 
@@ -41,6 +41,7 @@ macro ( swig_create_api )
 
   # General setup -------------------------
   add_custom_target ( API COMMENT "Building API." )
+  file ( MAKE_DIRECTORY ${SWGCA_OUTDIR} )
   include_directories ( "${SWGCA_OUTDIR}" )  # write .py, .php, etc in the outdir
   # see http://www.cmake.org/Wiki/CMake_FAQ#How_do_I_use_CMake_to_generate_SWIG_wrapper_libraries.3F
   set_source_files_properties ( ${SWGCA_INTERFACE_FILES} PROPERTIES CPLUSPLUS ON )
@@ -54,7 +55,7 @@ macro ( swig_create_api )
   # Csharp -------------------------
   if ( BUILD_API_CSHARP )
     find_package ( CSharp REQUIRED )
-    set ( apiName "api_csharp" )
+    set ( apiName "${SWGCA_NAME}_api_csharp" )
     set ( CMAKE_SWIG_OUTDIR "${SWGCA_OUTDIR}/csharp" )
     file ( MAKE_DIRECTORY ${CMAKE_SWIG_OUTDIR} )
     swig_add_module ( ${apiName} CSharp ${SWGCA_INTERFACE_FILES} ${SWGCA_SOURCE_FILES} )
@@ -74,7 +75,7 @@ macro ( swig_create_api )
   # PHP5 -------------------------
   if ( BUILD_API_PHP5 )
     find_package ( PHP5 REQUIRED )
-    set ( apiName "api_php5" )
+    set ( apiName "${SWGCA_NAME}_api_php5" )
     set ( CMAKE_SWIG_OUTDIR "${SWGCA_OUTDIR}/php5" )
     file ( MAKE_DIRECTORY ${CMAKE_SWIG_OUTDIR} )
     swig_add_module ( ${apiName} php ${SWGCA_INTERFACE_FILES} ${SWGCA_SOURCE_FILES} )
@@ -91,11 +92,10 @@ macro ( swig_create_api )
     add_dependencies ( API ${apiName} )
   endif ()
 
-
   # Python -------------------------
   if ( BUILD_API_PYTHON )
     find_package ( PythonLibs REQUIRED )
-    set ( apiName "api_python" )
+    set ( apiName "${SWGCA_NAME}_api_python" )
     set ( CMAKE_SWIG_OUTDIR "${SWGCA_OUTDIR}/python" )
     file ( MAKE_DIRECTORY ${CMAKE_SWIG_OUTDIR} )
     swig_add_module ( ${apiName} python ${SWGCA_INTERFACE_FILES} ${SWGCA_SOURCE_FILES} )
@@ -115,11 +115,10 @@ macro ( swig_create_api )
     add_dependencies ( API ${apiName} )
   endif ()
 
-
   # Ruby -------------------------
   if ( BUILD_API_RUBY )
     find_package ( Ruby REQUIRED )
-    set ( apiName "api_ruby" )
+    set ( apiName "${SWGCA_NAME}_api_ruby" )
     set ( CMAKE_SWIG_OUTDIR "${SWGCA_OUTDIR}/ruby" )
     file ( MAKE_DIRECTORY ${CMAKE_SWIG_OUTDIR} )
     swig_add_module ( ${apiName} ruby ${SWGCA_INTERFACE_FILES} ${SWGCA_SOURCE_FILES} )
