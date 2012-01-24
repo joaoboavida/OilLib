@@ -6,10 +6,10 @@ include ( ${CMAKE_CURRENT_SOURCE_DIR}/UseSWIG.cmake )
 
 option ( BUILD_API_ADD_TO_ALL "Whether the API should be built by default" OFF )
 
-option ( BUILD_API_CSHARP "Whether to provide a target for generating the C# API" OFF )
+option ( BUILD_API_CSHARP "Whether to provide a target for generating the C# API" ON )
 option ( BUILD_API_PHP5 "Whether to provide a target for generating the PHP5 API" OFF )
-option ( BUILD_API_PYTHON "Whether to provide a target for generating the Python API" ON )
-option ( BUILD_API_RUBY "Whether to provide a target for generating the Ruby API" ON )
+option ( BUILD_API_PYTHON "Whether to provide a target for generating the Python API" OFF )
+option ( BUILD_API_RUBY "Whether to provide a target for generating the Ruby API" OFF )
 
 include ( CMakeParseArguments )
 
