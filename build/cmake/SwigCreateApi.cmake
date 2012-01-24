@@ -6,8 +6,8 @@ include ( ${CMAKE_CURRENT_SOURCE_DIR}/UseSWIG.cmake )
 
 option ( BUILD_API_ADD_TO_ALL "Whether the API should be built by default" OFF )
 
-option ( BUILD_API_CSHARP "Whether to provide a target for generating the C# API" ON )
-option ( BUILD_API_PHP5 "Whether to provide a target for generating the PHP5 API" ON )
+option ( BUILD_API_CSHARP "Whether to provide a target for generating the C# API" OFF )
+option ( BUILD_API_PHP5 "Whether to provide a target for generating the PHP5 API" OFF )
 option ( BUILD_API_PYTHON "Whether to provide a target for generating the Python API" ON )
 option ( BUILD_API_RUBY "Whether to provide a target for generating the Ruby API" ON )
 
@@ -65,7 +65,7 @@ macro ( swig_create_api )
       ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_SWIG_OUTDIR}"
       LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SWIG_OUTDIR}"
       RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SWIG_OUTDIR}"
-      OUTPUT_NAME ${SWGCA_NAME}
+      OUTPUT_NAME "${SWGCA_NAME}"
       COMMENT "API was put into ${CMAKE_SWIG_OUTDIR}"
     )
     target_link_libraries ( ${apiName} ${SWGCA_ADDITIONAL_LIBS} )
@@ -85,7 +85,7 @@ macro ( swig_create_api )
       ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_SWIG_OUTDIR}"
       LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SWIG_OUTDIR}"
       RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SWIG_OUTDIR}"
-      OUTPUT_NAME ${SWGCA_NAME}
+      OUTPUT_NAME "${SWGCA_NAME}"
       COMMENT "API was put into ${CMAKE_SWIG_OUTDIR}"
     )
     target_link_libraries ( ${apiName} ${SWGCA_ADDITIONAL_LIBS} )
@@ -107,7 +107,7 @@ macro ( swig_create_api )
       ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_SWIG_OUTDIR}"
       LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SWIG_OUTDIR}"
       RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SWIG_OUTDIR}"
-      OUTPUT_NAME ${SWGCA_NAME}
+      OUTPUT_NAME "${SWGCA_NAME}"
       PREFIX "_"  # name it as _extension.so (linux)
       COMMENT "API was put into ${CMAKE_SWIG_OUTDIR}"
     )
@@ -128,7 +128,7 @@ macro ( swig_create_api )
       ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_SWIG_OUTDIR}"
       LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SWIG_OUTDIR}"
       RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SWIG_OUTDIR}"
-      OUTPUT_NAME ${SWGCA_NAME}
+      OUTPUT_NAME "${SWGCA_NAME}"
       PREFIX "" # name it as extension.so (linux)
       COMMENT "API was put into ${CMAKE_SWIG_OUTDIR}"
     )

@@ -137,9 +137,11 @@ MACRO(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
   IF(CMAKE_SWIG_OUTDIR)
     SET(swig_outdir ${CMAKE_SWIG_OUTDIR})
     # it may not exist, so create it:
-    file(MAKE_DIRECTORY ${CMAKE_SWIG_OUTDIR})
+    file(MAKE_DIRECTORY ${swig_outdir})
   ELSE(CMAKE_SWIG_OUTDIR)
     SET(swig_outdir ${CMAKE_CURRENT_BINARY_DIR})
+    # it may not exist, so create it:
+    file(MAKE_DIRECTORY ${swig_outdir})
   ENDIF(CMAKE_SWIG_OUTDIR)
   SWIG_GET_EXTRA_OUTPUT_FILES(${SWIG_MODULE_${name}_LANGUAGE}
     swig_extra_generated_files
