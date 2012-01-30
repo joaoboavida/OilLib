@@ -44,7 +44,6 @@ macro ( swig_create_api )
   # General setup -------------------------
   add_custom_target ( API COMMENT "Building API." )
   file ( MAKE_DIRECTORY ${SWGCA_OUTDIR} )
-  include_directories ( "${SWGCA_OUTDIR}" )  # write .py, .php, etc in the outdir
   # see http://www.cmake.org/Wiki/CMake_FAQ#How_do_I_use_CMake_to_generate_SWIG_wrapper_libraries.3F
   set_source_files_properties ( ${SWGCA_INTERFACE_FILES} PROPERTIES CPLUSPLUS ON )
   if ( API_ADD_TO_ALL )
@@ -124,7 +123,6 @@ macro ( swig_create_api )
     file ( MAKE_DIRECTORY ${CMAKE_SWIG_OUTDIR} )
     swig_add_module ( ${apiName} python ${SWGCA_INTERFACE_FILES} ${SWGCA_SOURCE_FILES} )
     swig_link_libraries ( ${apiName} ${PYTHON_LIBRARIES} )
-    set ( apiName "_${apiName}" )
     add_incs_to_target ( ${apiName} "${PYTHON_INCLUDE_PATH}" )
     set_target_properties ( ${apiName} PROPERTIES
       EXCLUDE_FROM_ALL 1

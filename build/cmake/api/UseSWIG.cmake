@@ -49,18 +49,21 @@ MACRO(SWIG_MODULE_INITIALIZE name language)
 
   IF("x${SWIG_MODULE_${name}_LANGUAGE}x" MATCHES "^xUNKNOWNx$")
     MESSAGE(FATAL_ERROR "SWIG Error: Language \"${language}\" not found")
-  ENDIF("x${SWIG_MODULE_${name}_LANGUAGE}x" MATCHES "^xUNKNOWNx$")
+  ENDIF()
 
   SET(SWIG_MODULE_${name}_REAL_NAME "${name}")
-  IF("x${SWIG_MODULE_${name}_LANGUAGE}x" MATCHES "^xPYTHONx$")
-    # when swig is used without the -interface it will produce in the module.py
-    # a 'import _modulename' statement, which implies having a corresponding 
-    # _modulename.so (*NIX), _modulename.pyd (Win32).
-    SET(SWIG_MODULE_${name}_REAL_NAME "_${name}")
-  ENDIF("x${SWIG_MODULE_${name}_LANGUAGE}x" MATCHES "^xPYTHONx$")
+
+#  IF("x${SWIG_MODULE_${name}_LANGUAGE}x" MATCHES "^xPYTHONx$")
+#    # when swig is used without the -interface it will produce in the module.py
+#    # a 'import _modulename' statement, which implies having a corresponding
+#    # _modulename.so (*NIX), _modulename.pyd (Win32).
+#    SET(SWIG_MODULE_${name}_REAL_NAME "_${name}")
+#  ENDIF()
+
   IF("x${SWIG_MODULE_${name}_LANGUAGE}x" MATCHES "^xPERLx$")
     SET(SWIG_MODULE_${name}_EXTRA_FLAGS "-shadow")
-  ENDIF("x${SWIG_MODULE_${name}_LANGUAGE}x" MATCHES "^xPERLx$")
+  ENDIF()
+
 ENDMACRO(SWIG_MODULE_INITIALIZE)
 
 #
@@ -69,15 +72,19 @@ ENDMACRO(SWIG_MODULE_INITIALIZE)
 #
 
 MACRO(SWIG_GET_EXTRA_OUTPUT_FILES language outfiles generatedpath infile)
+
   GET_SOURCE_FILE_PROPERTY(SWIG_GET_EXTRA_OUTPUT_FILES_module_basename
     ${infile} SWIG_MODULE_NAME)
+
   IF(SWIG_GET_EXTRA_OUTPUT_FILES_module_basename STREQUAL "NOTFOUND")
     GET_FILENAME_COMPONENT(SWIG_GET_EXTRA_OUTPUT_FILES_module_basename "${infile}" NAME_WE)
-  ENDIF(SWIG_GET_EXTRA_OUTPUT_FILES_module_basename STREQUAL "NOTFOUND")
+  ENDIF()
+
   FOREACH(it ${SWIG_${language}_EXTRA_FILE_EXTENSION})
     SET(${outfiles} ${${outfiles}}
       "${generatedpath}/${SWIG_GET_EXTRA_OUTPUT_FILES_module_basename}.${it}")
   ENDFOREACH(it)
+
 ENDMACRO(SWIG_GET_EXTRA_OUTPUT_FILES)
 
 #

@@ -13,7 +13,7 @@ set ( OILLIB_VERSION_STRING "${OILLIB_MAJOR_VERSION}.${OILLIB_MINOR_VERSION}.${O
 
 # ######### General setup ##########
 
-option ( BUILD_SHARED_LIBS "Build shared libraries." ON )
+option ( BUILD_SHARED_LIBS "Build shared libraries." OFF )
 
 option ( BUILD_API "Whether the API is to be built - can be fine tuned for each lang" OFF )
 
