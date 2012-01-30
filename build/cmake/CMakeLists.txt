@@ -45,7 +45,7 @@ else ()
     unset ( OILLIB_SHARED_BUILD )
 endif ()
 
-list ( APPEND CMAKE_MODULE_PATH "${PROJECT_TOP_DIR}/build/cmake" )
+list ( APPEND CMAKE_MODULE_PATH "${PROJECT_TOP_DIR}/build/cmake/api" )
 
 # ######### Gather all the sources  ##########
 
@@ -84,7 +84,7 @@ set_target_properties ( OilLib PROPERTIES
 # ######### Create the API  ##########
 
 if ( BUILD_API )
-  include ( SwigCreateApi.cmake )
+  include ( api/SwigCreateApi.cmake )
   swig_create_api ( NAME oil
                     OUTDIR ${OILLIB_LIB_DIR}
                     INTERFACE_FILES ${OILLIB_INTERFACE_FILES}

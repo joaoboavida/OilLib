@@ -2,12 +2,13 @@
 # ######### Utilities to create an API using SWIG  ##########
 
 find_package ( SWIG REQUIRED )
-include ( ${CMAKE_CURRENT_SOURCE_DIR}/UseSWIG.cmake )
+include ( ${CMAKE_CURRENT_LIST_DIR}/UseSWIG.cmake )
 
 option ( BUILD_API_ADD_TO_ALL "Whether the API should be built by default" OFF )
 
 option ( BUILD_API_CSHARP "Whether to provide a target for generating the C# API" ON )
 option ( BUILD_API_PHP5 "Whether to provide a target for generating the PHP5 API" OFF )
+option ( BUILD_API_OCTAVE "Whether to provide a target for generating the Octave API" OFF )
 option ( BUILD_API_PYTHON "Whether to provide a target for generating the Python API" OFF )
 option ( BUILD_API_RUBY "Whether to provide a target for generating the Ruby API" OFF )
 
@@ -30,14 +31,15 @@ macro ( swig_create_api )
   #usage of cmake_parse_arguments: http://www.cmake.org/Wiki/CMakeMacroParseArguments
   set ( options )
   set ( oneValueArgs NAME OUTDIR )
-  set ( multiValueArgs INTERFACE_FILES SOURCE_FILES ADDITIONAL_LIBS )
+  set ( multiValueArgs INTERFACE_FILES SOURCE_FILES ADDITIONAL_LIBS SWIG_OPTIONS )
   cmake_parse_arguments ( SWGCA "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
 
-  #message ( STATUS "NAME=${SWGCA_NAME}" )
-  #message ( STATUS "OUTDIR=${SWGCA_OUTDIR}" )
-  #message ( STATUS "INTERFACE_FILES=${SWGCA_INTERFACE_FILES}" )
-  #message ( STATUS "SOURCE_FILES=${SWGCA_SOURCE_FILES}" )
-  #message ( STATUS "ADDITIONAL_LIBS=${SWGCA_ADDITIONAL_LIBS}" )
+#  message ( STATUS "NAME=${SWGCA_NAME}" )
+#  message ( STATUS "OUTDIR=${SWGCA_OUTDIR}" )
+#  message ( STATUS "INTERFACE_FILES=${SWGCA_INTERFACE_FILES}" )
+#  message ( STATUS "SOURCE_FILES=${SWGCA_SOURCE_FILES}" )
+#  message ( STATUS "ADDITIONAL_LIBS=${SWGCA_ADDITIONAL_LIBS}" )
+#  message ( STATUS "SWIG_OPTIONS=${SWGCA_SWIG_OPTIONS}" )
 
   # General setup -------------------------
   add_custom_target ( API COMMENT "Building API." )
@@ -48,6 +50,7 @@ macro ( swig_create_api )
   if ( API_ADD_TO_ALL )
     add_dependencies ( all API )
   endif ()
+  set ( CMAKE_SWIG_FLAGS ${SWGCA_SWIG_OPTIONS} )
 
   # many of the cmake find files were taken from gdcm:
   # http://sourceforge.net/projects/gdcm/
@@ -60,6 +63,27 @@ macro ( swig_create_api )
     file ( MAKE_DIRECTORY ${CMAKE_SWIG_OUTDIR} )
     swig_add_module ( ${apiName} CSharp ${SWGCA_INTERFACE_FILES} ${SWGCA_SOURCE_FILES} )
     # not necessary to add_incs_to_target()
+    set_target_properties ( ${apiName} PROPERTIES
+      EXCLUDE_FROM_ALL 1
+      ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_SWIG_OUTDIR}"
+      LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SWIG_OUTDIR}"
+      RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SWIG_OUTDIR}"
+      OUTPUT_NAME "${SWGCA_NAME}"
+      COMMENT "API was put into ${CMAKE_SWIG_OUTDIR}"
+    )
+    target_link_libraries ( ${apiName} ${SWGCA_ADDITIONAL_LIBS} )
+    add_dependencies ( API ${apiName} )
+  endif ()
+
+  # Octave -------------------------
+  if ( BUILD_API_OCTAVE )
+    find_package ( Octave REQUIRED )
+    find_package ( MPI REQUIRED )  # octave includes HDF5 which includes mpi.h
+    set ( apiName "${SWGCA_NAME}_api_octave" )
+    set ( CMAKE_SWIG_OUTDIR "${SWGCA_OUTDIR}/octave" )
+    file ( MAKE_DIRECTORY ${CMAKE_SWIG_OUTDIR} )
+    swig_add_module ( ${apiName} octave ${SWGCA_INTERFACE_FILES} ${SWGCA_SOURCE_FILES} )
+    add_incs_to_target ( ${apiName} ${OCTAVE_INCLUDE_DIR} ${MPI_CXX_INCLUDE_PATH} ${CMAKE_SWIG_OUTDIR} )
     set_target_properties ( ${apiName} PROPERTIES
       EXCLUDE_FROM_ALL 1
       ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_SWIG_OUTDIR}"
