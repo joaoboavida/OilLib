@@ -14,6 +14,8 @@ set ( OILLIB_VERSION_STRING "${OILLIB_MAJOR_VERSION}.${OILLIB_MINOR_VERSION}.${O
 # ######### General setup ##########
 
 option ( BUILD_SHARED_LIBS "Build shared libraries." OFF )
+option ( BUILD_TESTS "Whether tests should be included in the makefile." ON )
+#option ( BUILD_EXAMPLES "Whether examples should be included in the makefile." ON )
 
 option ( BUILD_API "Whether the API is to be built - can be fine tuned for each lang" OFF )
 
@@ -80,6 +82,13 @@ set_target_properties ( OilLib PROPERTIES
    PUBLIC_HEADER "${OILLIB_PUBLIC_HEADERS}"
    OUTPUT_NAME "oil"
 )
+
+if ( BUILD_TESTS )
+  add_subdirectory ( ${PROJECT_TOP_DIR}/test ${PROJECT_BINARY_DIR}/../test )
+endif()
+#if ( BUILD_EXAMPLES )
+#  add_subdirectory ( ${PROJECT_TOP_DIR}/example ${PROJECT_BINARY_DIR}/../example )
+#endif()
 
 # ######### Create the API  ##########
 
