@@ -6,6 +6,7 @@
 #include <cassert>
 #include <vector>
 #include <map>
+#include <cmath>
 
 namespace oil {
 
@@ -16,16 +17,17 @@ public:
 
   typedef Type value_type;
 
-  typedef std::vector< value_type > container_type;
+  struct Entry
+  {
+    value_type value;
+    value_type volatility;
+  };
 
-  typedef typename container_type::iterator iterator;
-  typedef typename container_type::const_iterator const_iterator;
-  typedef typename container_type::reverse_iterator reverse_iterator;
-  typedef typename container_type::const_reverse_iterator const_reverse_iterator;
+  typedef std::vector< Entry > container_type;
 
 private:
 
-  struct average_tracker
+  struct AverageTracker
   {
     unsigned int n;
     value_type avg;
@@ -33,7 +35,7 @@ private:
     unsigned int count;
     const container_type& vals;
 
-    average_tracker ( const unsigned int n_, const container_type& vals_ )
+    AverageTracker ( const unsigned int n_, const container_type& vals_ )
       :
         n(n_), avg(0), count(0), vals(vals_)
     {
@@ -43,7 +45,7 @@ private:
       int stop = ( s >= 1+count ) ? s-1-count : 0;
       for ( int i = s-1; i >= stop; --i )
       {
-        avg += vals[i];
+        avg += vals[i].value;
       }
       avg /= count;
     }
@@ -52,7 +54,7 @@ private:
       typename container_type::size_type s ( vals.size() );
       if ( count == n )
       {
-        avg = ( avg * n - vals[s-1-n] + v ) / n;
+        avg = ( avg * n - vals[s-1-n].value + v ) / n;
       }
       else
       {
@@ -64,10 +66,16 @@ private:
 
 public:
 
-  typedef std::map< unsigned int, average_tracker* > average_container_type;
+  typedef typename container_type::iterator iterator;
+  typedef typename container_type::const_iterator const_iterator;
+  typedef typename container_type::reverse_iterator reverse_iterator;
+  typedef typename container_type::const_reverse_iterator const_reverse_iterator;
 
-  time_series () {}
-  time_series ( const value_type v ) { addNewVal(v); }
+public:
+
+  typedef std::map< unsigned int, AverageTracker* > average_container_type;
+
+  time_series () : m_period(22) {}
 
   ~time_series ()
   {
@@ -93,12 +101,21 @@ public:
 
   const unsigned int size() const { return m_values.size(); }
 
-  value_type& back() { return m_values.back(); }
-  const value_type& back () const { return m_values.back(); }
+  value_type& back() { return m_values.back().value; }
+  const value_type& back () const { return m_values.back().value; }
 
   void push_back ( const value_type v )
   {
-    m_values.push_back(v);
+    Entry e;
+    e.value = v;
+    typename container_type::size_type s = m_values.size();
+    const Entry &prev = m_values[s-1];
+    e.volatility = (s > 0 ) ?
+                        computeVolatility(v, prev.value, prev.volatility, m_period)
+                      :
+                        /** @todo FIXME fix this value */
+                        value_type(0.3440106587);
+    m_values.push_back(e);
     for(
          typename average_container_type::iterator it = m_averages.begin();
          it != m_averages.end();
@@ -119,16 +136,63 @@ public:
     }
     else
     {
-      average_tracker *ptr = new average_tracker(n, m_values);
+      AverageTracker *ptr = new AverageTracker(n, m_values);
       m_averages[n] = ptr;
       return ptr->avg;
     }
+  }
+
+  value_type getReturn ( iterator &it )
+  {
+    if(it != m_values.begin())
+    {
+      iterator prev = it;
+      --prev;
+      return it->value - prev->value;
+    }
+    else return value_type(0);
+  }
+
+  value_type getLogReturn ( iterator &it )
+  {
+    if(it != m_values.begin())
+    {
+      iterator prev = it;
+      --prev;
+      return log(it->value) - log(prev->value);
+    }
+    else return value_type(0);
+  }
+
+  value_type getAdjustedReturn ( iterator &it )
+  {
+    return getReturn ( it ) / getVolatility ( it );
+  }
+
+
+  value_type getVolatility ( iterator &it )
+  {
+    return it->volatility;
   }
 
 private:
 
   container_type m_values;
   average_container_type m_averages;
+  int m_period;
+
+  value_type computeVolatility ( const value_type pn, const value_type pnm1,
+                                 const value_type volm1, const int period )
+  {
+    value_type w_tn = value_type(1.0) / period,
+               ret = pn - pnm1;
+    return sqrt (
+                  (value_type(1.0) - w_tn) * volm1 * volm1
+                 +
+                  w_tn * ret * ret
+                );
+  }
+
 
 };
 
