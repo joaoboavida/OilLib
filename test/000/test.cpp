@@ -11,15 +11,15 @@ int main(int argc, char *argv[])
 {
   TimeSeries s;
 
-
   for(int i = 0; i < 100; ++i)
   {
-    s.push_back(1.0 + i);
-    std::cout << i << ": size=" << s.size()
-              << "  av1=" << s.movingAverage( 1 )
-              << "  av2=" << s.movingAverage( 2 )
-              << "  av4=" << s.movingAverage( 4 )
-              << "  av8=" << s.movingAverage( 8 )
+    s.push_back(i + 1);
+    std::cout << "i=" << i << ": size=" << s.size()
+              << "  last=" << s.back()
+              << "     av1=" << s.getMovingAverage( 1 )
+              << "  av2=" << s.getMovingAverage( 2 )
+              << "  av4=" << s.getMovingAverage( 4 )
+              << "  av8=" << s.getMovingAverage( 8 )
               << std::endl;
   }
 
