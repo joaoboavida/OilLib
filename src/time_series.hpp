@@ -104,6 +104,9 @@ public:
   value_type& back() { return m_values.back().value; }
   const value_type& back () const { return m_values.back().value; }
 
+  int getPeriod () const { return m_period; }
+  void setPeriod ( const int period ) { m_period = period; }
+
   void push_back ( const value_type v )
   {
     Entry e;
@@ -142,6 +145,24 @@ public:
     }
   }
 
+  value_type getMovingAverage ( const unsigned int n, const iterator &it )
+  {
+    value_type avg ( 0 );
+    int count ( 0 );
+    for (
+          typename container_type::iterator ita ( it );
+          count < n && count < size();
+          --ita
+        )
+    {
+      avg += ita->value;
+      ++count;
+    }
+    avg /= count;
+
+    return avg;
+  }
+
   value_type getReturn ( iterator &it )
   {
     if(it != m_values.begin())
@@ -168,7 +189,6 @@ public:
   {
     return getReturn ( it ) / getVolatility ( it );
   }
-
 
   value_type getVolatility ( iterator &it )
   {
