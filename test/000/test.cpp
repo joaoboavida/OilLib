@@ -10,7 +10,6 @@ typedef time_series< double > TimeSeries;
 
 int main(int argc, char *argv[])
 {
-  /*
   TimeSeries s;
 
   for(int i = 0; i < 100; ++i)
@@ -19,19 +18,22 @@ int main(int argc, char *argv[])
     std::cout << "i=" << i << ": size=" << s.size()
               << "  last=" << s.back()
               << "     av1=" << s.getMovingAverage( 1 )
+              << " .v1=" << s.getMovingAverage( 1, --s.end() )
               << "  av2=" << s.getMovingAverage( 2 )
+              << " .v2=" << s.getMovingAverage( 2, --s.end() )
               << "  av4=" << s.getMovingAverage( 4 )
+              << " .v4=" << s.getMovingAverage( 4, --s.end() )
               << "  av8=" << s.getMovingAverage( 8 )
+//              << " .v8=" << s.getMovingAverage( 8, --s.end() )
               << std::endl;
   }
   return 0;
-*/
+
   std::ifstream prices("prices.dat");
   std::string sdate, sprice;
   prices >> sdate >> sprice;
   std::cout << sdate << "  " << sprice << std::endl;
 
-  TimeSeries s;
   double fundSize = 10000,
          contractSize = 1000;
 
