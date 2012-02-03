@@ -2,6 +2,8 @@
 #include <iostream>
 #include <fstream>
 
+#include <string>
+
 #include "time_series.hpp"
 
 using namespace oil;
