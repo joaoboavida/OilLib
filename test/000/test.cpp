@@ -3,110 +3,26 @@
 #include <fstream>
 
 #include "time_series.hpp"
+#include "trading_rule.hpp"
 
 using namespace oil;
 
 typedef time_series< double > TimeSeries;
+typedef trading_rule< double > TradingRule;
+typedef moving_average_crossover< double > TradingRuleAVG;
+typedef lag_crossover< double > TradingRuleLAG;
 
-class trading_rule
-{
-public:
-  virtual ~trading_rule () {}
-  typedef enum { SELL = -1, REFRAIN = 0, BUY = 1 } BuySignal;
-  virtual BuySignal operator() ( TimeSeries &s ) = 0;
-  static int translate ( const BuySignal &s ) { return s; }
-private:
-};
-
-
-class moving_average_crossover : public trading_rule
-{
-public:
-  moving_average_crossover( int speriod, int lperiod )
-    :
-      m_shortPeriod(speriod),
-      m_longPeriod(lperiod)
-  {
-  }
-  virtual ~moving_average_crossover () {}
-  trading_rule::BuySignal operator() ( TimeSeries &s )
-  {
-    double sewma = s.getMovingAverage(m_shortPeriod),
-           lewma = s.getMovingAverage(m_longPeriod),
-           crossover = sewma - lewma;
-
-    trading_rule::BuySignal sig;
-    if ( crossover == 0 ) sig = REFRAIN;
-    else if ( crossover > 0 ) sig = BUY;
-    else if ( crossover < 0 ) sig = SELL;
-
-    std::cout << " sewma=" << sewma
-              << " lewma=" << lewma
-              << " crossover=" << crossover
-              << " signal=" << sig;
-
-    return sig;
-  }
-private:
-  int m_shortPeriod;
-  int m_longPeriod;
-};
-
-class lag_crossover : public trading_rule
-{
-public:
-  lag_crossover ( int speriod, int lperiod,
-                 double oldShort = -1.18, double oldLong = -1.18)
-    :
-      m_shortPeriod(speriod),
-      m_oldShort(oldShort),
-      m_longPeriod(lperiod),
-      m_oldLong(oldLong)
-  {
-  }
-  virtual ~lag_crossover () {}
-  trading_rule::BuySignal operator() ( TimeSeries &s )
-  {
-    double price = s.current();
-
-    double ws = double(1) / m_shortPeriod;
-    double sewma = (double(1) - ws) * m_oldShort + ws * price;
-    double wl = double(1) / m_longPeriod;
-    double lewma = (double(1) - wl) * m_oldLong + wl * price;
-
-    m_oldShort = sewma;
-    m_oldLong = lewma;
-    double crossover = sewma - lewma;
-
-    trading_rule::BuySignal sig;
-    if ( crossover == 0 ) sig = REFRAIN;
-    else if ( crossover > 0 ) sig = BUY;
-    else if ( crossover < 0 ) sig = SELL;
-
-    std::cout << " sewma=" << m_oldShort
-              << " lewma=" << m_oldLong
-              << " crossover=" << crossover
-              << " signal=" << sig;
-
-    return sig;
-  }
-  double getOldShort() { return m_oldShort; }
-  double getOldLong() { return m_oldLong; }
-
-private:
-  int m_shortPeriod;
-  double m_oldShort;
-  int m_longPeriod;
-  double m_oldLong;
-};
-
-
+template< typename Type >
 class agent
 {
 public:
 
+  typedef Type value_type;
+  typedef time_series< Type > series_type;
+  typedef trading_rule< Type > rule_type;
+
   agent () {}
-  agent ( double cash )
+  agent ( value_type cash )
    :
      m_initialCash ( cash ),
      m_currentCash ( cash ),
@@ -115,26 +31,26 @@ public:
   }
   ~agent () {}
 
-  void init ( double cash )
+  void init ( value_type cash )
   {
     m_initialCash = cash;
     m_currentCash = cash;
     m_positions = 0;
   }
 
-  void setOilPrice ( TimeSeries &s ) { m_oilPrice = &s; }
-  void setTradingRule ( trading_rule *r ) { m_rule = r; }
-  static void setContractSize ( const double size ) { m_contractSize = size; }
+  void setOilPrice ( series_type &s ) { m_oilPrice = &s; }
+  void setTradingRule ( rule_type *r ) { m_rule = r; }
+  static void setContractSize ( const value_type size ) { m_contractSize = size; }
 
-  double getCash() { return m_currentCash; }
-  void setCash ( double c ) { m_currentCash = c; }
-  double getInitialCash() { return m_initialCash; }
+  value_type getCash() { return m_currentCash; }
+  void setCash ( value_type c ) { m_currentCash = c; }
+  value_type getInitialCash() { return m_initialCash; }
   bool isSolvent() { return (getWealth() > 0); }
 
-  double getWealth() { return m_currentCash; }
-  double getDemand() { return m_positions; }
+  value_type getWealth() { return m_currentCash; }
+  value_type getDemand() { return m_positions; }
 
-  trading_rule::BuySignal decide()
+  typename rule_type::BuySignal decide()
   {
     return (*m_rule)( *m_oilPrice );
   }
@@ -142,10 +58,10 @@ public:
   int computeDemand ()
   {
     // analyze the series - compute the signal
-    trading_rule::BuySignal sig ( decide() );
+    typename rule_type::BuySignal sig ( decide() );
 
     // translate the signal to an int
-    int sigval = trading_rule::translate( sig ); // -1, 0, 1
+    int sigval = rule_type::translate( sig ); // -1, 0, 1
 
     // compute wanted position - absolute
     m_positions = ( sigval * m_currentCash )
@@ -155,9 +71,9 @@ public:
     return m_positions;
   }
 
-  double trade ( int nFinalPositions )
+  value_type trade ( int nFinalPositions )
   {
-    double PnL = nFinalPositions
+    value_type PnL = nFinalPositions
                  *
                  m_oilPrice->getReturn() * m_contractSize; // unit return
     m_currentCash += PnL;
@@ -168,10 +84,10 @@ public:
 private:
 
   TimeSeries *m_oilPrice;
-  trading_rule *m_rule;
+  rule_type *m_rule;
 
-  double m_initialCash;
-  double m_currentCash;
+  value_type m_initialCash;
+  value_type m_currentCash;
 
   static int m_contractSize;
 
@@ -179,14 +95,15 @@ private:
 
 };
 
-int agent::m_contractSize = 1000;
+template< typename Type >
+int agent< Type >::m_contractSize = 1000;
+
+typedef agent< double > Agent;
 
 
 
 
-
-
-void blabla( agent& a )
+void blabla( Agent& a )
 {
   int positions = a.computeDemand();
   int trade = positions;
@@ -234,12 +151,12 @@ int main(int argc, char *argv[])
   double fundSize = 10000,
          contractSize = 1000;
 
-  moving_average_crossover ruleAvg(2, 8);
-  lag_crossover ruleLag(2, 8);
+  TradingRuleLAG ruleLag(2, 8);
+  TradingRuleAVG ruleAvg(2, 8);
 
-  agent firstAgent, secondAgent;
+  Agent firstAgent, secondAgent;
 
-  agent::setContractSize(1000);
+  Agent::setContractSize(1000);
 
   firstAgent.setTradingRule(&ruleLag);
   firstAgent.setOilPrice(s);
