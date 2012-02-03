@@ -2,7 +2,6 @@
 #define OIL_TRADING_RULE_HPP
 
 #include <iostream>
-#include <fstream>
 
 #include "time_series.hpp"
 
@@ -115,7 +114,7 @@ private:
   value_type m_oldLong;
 };
 
-}
+} // namespace oil
 
 #endif
 
