@@ -16,6 +16,14 @@ public:
   virtual ~trading_rule () {}
   typedef enum { SELL = -1, REFRAIN = 0, BUY = 1 } BuySignal;
   virtual BuySignal operator() ( series_type &s ) = 0;
+  static BuySignal computeSignal ( double crossover )
+  {
+    BuySignal sig;
+    if ( crossover == 0 ) sig = REFRAIN;
+    else if ( crossover > 0 ) sig = BUY;
+    else if ( crossover < 0 ) sig = SELL;
+    return sig;
+  }
   static int translate ( const BuySignal &s ) { return s; }
 private:
 };
@@ -43,10 +51,10 @@ public:
            lewma = s.getMovingAverage(m_longPeriod),
            crossover = sewma - lewma;
 
-    typename trading_rule< value_type >::BuySignal sig;
-    if ( crossover == 0 ) sig = trading_rule< value_type >::REFRAIN;
-    else if ( crossover > 0 ) sig = trading_rule< value_type >::BUY;
-    else if ( crossover < 0 ) sig = trading_rule< value_type >::SELL;
+    typename trading_rule< value_type >::BuySignal sig
+             (
+                 trading_rule< value_type >::computeSignal ( crossover )
+             );
 
     std::cout << " sewma=" << sewma
               << " lewma=" << lewma
@@ -92,10 +100,10 @@ public:
     m_oldShort = sewma;
     m_oldLong = lewma;
 
-    typename trading_rule< value_type >::BuySignal sig;
-    if ( crossover == 0 ) sig = trading_rule< value_type >::REFRAIN;
-    else if ( crossover > 0 ) sig = trading_rule< value_type >::BUY;
-    else if ( crossover < 0 ) sig = trading_rule< value_type >::SELL;
+    typename trading_rule< value_type >::BuySignal sig
+             (
+                 trading_rule< value_type >::computeSignal ( crossover )
+             );
 
     std::cout << " sewma=" << m_oldShort
               << " lewma=" << m_oldLong

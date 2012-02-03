@@ -79,7 +79,7 @@ public:
 
 private:
 
-  TimeSeries *m_oilPrice;
+  series_type *m_oilPrice;
   rule_type *m_rule;
 
   value_type m_initialCash;

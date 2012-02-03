@@ -13,7 +13,45 @@ typedef lag_crossover< double > TradingRuleLAG;
 typedef agent< double > Agent;
 
 
-void blabla( Agent& a )
+template< typename Type >
+class market
+{
+public:
+  typedef Type value_type;
+  typedef agent< value_type > agent_type;
+
+  typedef std::vector< agent_type* > container_type;
+
+  typedef typename container_type::iterator iterator;
+  typedef typename container_type::const_iterator const_iterator;
+  typedef typename container_type::reverse_iterator reverse_iterator;
+  typedef typename container_type::const_reverse_iterator const_reverse_iterator;
+
+  market ( unsigned int n ) : m_agents(n) {}
+
+  iterator begin () { return m_agents.begin(); }
+  const_iterator begin () const { return m_agents.begin(); }
+  iterator end () { return m_agents.end(); }
+  const_iterator end () const { return m_agents.end(); }
+
+  reverse_iterator rbegin () { return m_agents.rbegin(); }
+  const_reverse_iterator rbegin () const { return m_agents.rbegin(); }
+  reverse_iterator rend () { return m_agents.rend(); }
+  const_reverse_iterator rend () const { return m_agents.rend(); }
+
+  const unsigned int size() const { return m_agents.size(); }
+
+  value_type& back() { return m_agents.back().value; }
+  const value_type& back () const { return m_agents.back().value; }
+
+private:
+  std::vector< agent_type* > m_agents;
+};
+
+typedef market< double > Market;
+
+
+void blabla( Market& a )
 {
   int positions = a.computeDemand();
   int trade = positions;
