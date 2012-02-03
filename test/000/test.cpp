@@ -1,19 +1,66 @@
 
 #include <iostream>
 #include <fstream>
+#include <cstdlib>
 
 #include <string>
 
-#include "time_series.hpp"
+#include "market.hpp"
 
 using namespace oil;
 
 typedef time_series< double > TimeSeries;
+typedef trading_rule< double > TradingRule;
+typedef moving_average_crossover< double > TradingRuleAVG;
+typedef lag_crossover< double > TradingRuleLAG;
+typedef agent< double > Agent;
+typedef market< double > Market;
 
 int main(int argc, char *argv[])
 {
-  TimeSeries s;
+  Market myMarket ( 10 );
 
+  myMarket.setContractSize(1000);
+
+  TradingRuleLAG ruleLag(2, 8);
+  TradingRuleAVG ruleAvg(2, 8);
+
+  for ( Market::iterator it = myMarket.begin(); it != myMarket.end(); ++it)
+  {
+    Agent& a = *(*it);
+
+    double initialCash = 1000;
+    a.init(initialCash, myMarket);
+
+    double r = (double) rand() / (double) RAND_MAX;
+    if ( r < 0.5 ) a.setTradingRule( &ruleLag );
+    else a.setTradingRule( &ruleAvg );
+  }
+
+  std::ifstream prices("prices.dat");
+  std::string sdate, sprice;
+  prices >> sdate >> sprice;
+  std::cout << sdate << "  " << sprice << std::endl;
+
+  int timeLevel = 0;
+  for(;;)
+  {
+    double v;
+    prices >> sdate >> v;
+    if(prices.good()) myMarket.getOilPrice().push_back(v);
+    else break;
+
+    std::cout << "timeLevel=" << timeLevel << " " << std::endl;
+    myMarket.trade();
+
+    timeLevel++;
+    if ( timeLevel > 20 ) break;
+  }
+
+
+
+//  TimeSeries s;
+/*
   for(int i = 0; i < 100; ++i)
   {
     s.push_back(i + 1);
@@ -30,7 +77,8 @@ int main(int argc, char *argv[])
               << std::endl;
   }
   return 0;
-
+*/
+/*
   std::ifstream prices("prices.dat");
   std::string sdate, sprice;
   prices >> sdate >> sprice;
@@ -38,6 +86,20 @@ int main(int argc, char *argv[])
 
   double fundSize = 10000,
          contractSize = 1000;
+
+  TradingRuleLAG ruleLag(2, 8);
+  TradingRuleAVG ruleAvg(2, 8);
+
+  Agent firstAgent, secondAgent;
+
+  Agent::setContractSize(1000);
+
+  firstAgent.setTradingRule(&ruleLag);
+  firstAgent.setOilPrice(s);
+  firstAgent.init(fundSize);
+
+  secondAgent = firstAgent;
+  secondAgent.setTradingRule(&ruleAvg);
 
   int i = 0;
   int oldPositions = 0;
@@ -57,9 +119,11 @@ int main(int argc, char *argv[])
            vol = s.getVolatility(it),
            adj = s.getAdjustedReturn(it),
            ws = double(1) / double(2),
-           sewma = (1-ws)*oldSewma + ws*price, //s.getMovingAverage(2),
+           sewma = (1-ws)*oldSewma + ws*price, //
+        // sewma = s.getMovingAverage(2),
            wl = double(1) / double(8),
-           lewma = (1-wl)*oldLewma + wl*price, //s.getMovingAverage(8),
+           lewma = (1-wl)*oldLewma + wl*price, //
+        // lewma = s.getMovingAverage(8),
            crossover = sewma - lewma;
 
     int signal;
@@ -72,10 +136,13 @@ int main(int argc, char *argv[])
 
     double PnL = oldPositions * ret * contractSize;
 
-    std::cout << "price[" << ++i << "]=" << price
+    std::cout << "MARKET: price[" << i << "]=" << price
               << " return=" << ret
               << " vol=" << vol
               << " adj=" << adj
+              << std::endl;
+
+    std::cout << "EXCELOLD:"
               << " sewma=" << sewma
               << " lewma=" << lewma
               << " crossover=" << crossover
@@ -84,13 +151,25 @@ int main(int argc, char *argv[])
               << " trade=" << trade
               << " PnL=" << PnL
               << " pcPnL=" << PnL/fundSize * 100.0
+              << " cash=" << fundSize
               << std::endl;
 
+    std::cout << "AGENTLAG: ";
+    blabla ( firstAgent );
+    std::cout << "AGENTAVG: ";
+    blabla ( secondAgent );
+    std::cout << std::endl;
+
+    i++;
     oldPositions = positions;
     oldSewma = sewma;
     oldLewma = lewma;
-  }
 
+    myMarket.trade();
+  }
+*/
+
+  prices.close();
   return 0;
 
 }
