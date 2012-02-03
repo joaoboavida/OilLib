@@ -31,11 +31,20 @@ public:
   virtual ~moving_average_crossover () {}
   trading_rule::BuySignal operator() ( TimeSeries &s )
   {
-    double crossover = s.getMovingAverage(m_shortPeriod) - s.getMovingAverage(m_longPeriod);
+    double sewma = s.getMovingAverage(m_shortPeriod),
+           lewma = s.getMovingAverage(m_longPeriod),
+           crossover = sewma - lewma;
+
     trading_rule::BuySignal sig;
     if ( crossover == 0 ) sig = REFRAIN;
     else if ( crossover > 0 ) sig = BUY;
     else if ( crossover < 0 ) sig = SELL;
+
+    std::cout << " sewma=" << sewma
+              << " lewma=" << lewma
+              << " crossover=" << crossover
+              << " signal=" << sig;
+
     return sig;
   }
 private:
@@ -139,15 +148,19 @@ public:
     int sigval = trading_rule::translate( sig ); // -1, 0, 1
 
     // compute wanted position - absolute
-    m_positions = sigval * m_currentCash / ( m_contractSize * m_oilPrice->getVolatility() );
+    m_positions = ( sigval * m_currentCash )
+                  /
+                  ( m_contractSize * m_oilPrice->getVolatility() );
 
     return m_positions;
   }
 
-  double trade ( int npositionsToBuy )
+  double trade ( int nFinalPositions )
   {
-    double PnL = npositionsToBuy * m_oilPrice->getReturn() * m_contractSize;
-    m_currentCash -= PnL;
+    double PnL = nFinalPositions
+                 *
+                 m_oilPrice->getReturn() * m_contractSize; // unit return
+    m_currentCash += PnL;
     m_positions = 0;
     return PnL;
   }
@@ -177,8 +190,9 @@ void blabla( agent& a )
 {
   int positions = a.computeDemand();
   int trade = positions;
-  a.setCash ( 10000 );
+//  a.setCash ( 10000 );
   double PnL = a.trade( trade );
+//  a.setCash ( 10000 );
 
   std::cout << " posn=" << positions
             << " trade=" << trade
@@ -269,10 +283,13 @@ int main(int argc, char *argv[])
 
     double PnL = oldPositions * ret * contractSize;
 
-    std::cout << "EXCELOLD: price[" << i << "]=" << price
+    std::cout << "MARKET: price[" << i << "]=" << price
               << " return=" << ret
               << " vol=" << vol
               << " adj=" << adj
+              << std::endl;
+
+    std::cout << "EXCELOLD:"
               << " sewma=" << sewma
               << " lewma=" << lewma
               << " crossover=" << crossover
@@ -284,12 +301,10 @@ int main(int argc, char *argv[])
               << " cash=" << fundSize
               << std::endl;
 
-    std::cout << "AGENTLAG: price[" << i << "]=" << price
-              << " return=" << ret
-              << " vol=" << vol
-              << " adj=" << adj;
+    std::cout << "AGENTLAG: ";
     blabla ( firstAgent );
-
+    std::cout << "AGENTAVG: ";
+    blabla ( secondAgent );
     std::cout << std::endl;
 
     i++;
