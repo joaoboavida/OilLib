@@ -104,6 +104,8 @@ public:
   value_type& back() { return m_values.back().value; }
   const value_type& back () const { return m_values.back().value; }
 
+  value_type current() { return m_values.back().value; }
+
   int getPeriod () const { return m_period; }
   void setPeriod ( const int period ) { m_period = period; }
 
@@ -129,22 +131,6 @@ public:
     }
   }
 
-  value_type getMovingAverage ( const unsigned int n )
-  {
-    typename average_container_type::iterator it ( m_averages.find ( n ) );
-
-    if ( it != m_averages.end() )
-    {
-      return it->second->avg;
-    }
-    else
-    {
-      AverageTracker *ptr = new AverageTracker(n, m_values);
-      m_averages[n] = ptr;
-      return ptr->avg;
-    }
-  }
-
   value_type getMovingAverage ( const unsigned int n, const iterator &it )
   {
     value_type avg ( 0 );
@@ -162,6 +148,21 @@ public:
 
     return avg;
   }
+  value_type getMovingAverage ( const unsigned int n )
+  {
+    typename average_container_type::iterator it ( m_averages.find ( n ) );
+
+    if ( it != m_averages.end() )
+    {
+      return it->second->avg;
+    }
+    else
+    {
+      AverageTracker *ptr = new AverageTracker(n, m_values);
+      m_averages[n] = ptr;
+      return ptr->avg;
+    }
+  }
 
   value_type getReturn ( iterator &it )
   {
@@ -172,6 +173,11 @@ public:
       return it->value - prev->value;
     }
     else return value_type(0);
+  }
+  value_type getReturn ()
+  {
+    iterator it = --(m_values.end());
+    return getReturn( it );
   }
 
   value_type getLogReturn ( iterator &it )
@@ -184,16 +190,32 @@ public:
     }
     else return value_type(0);
   }
+  value_type getLogReturn ()
+  {
+    iterator it = --(m_values.end());
+    return getLogReturn( it );
+  }
 
   value_type getAdjustedReturn ( iterator &it )
   {
     return getReturn ( it ) / getVolatility ( it );
+  }
+  value_type getAdjustedReturn ()
+  {
+    iterator it = --(m_values.end());
+    return getAdjustedReturn ( it );
   }
 
   value_type getVolatility ( iterator &it )
   {
     return it->volatility;
   }
+  value_type getVolatility ()
+  {
+    iterator it = --(m_values.end());
+    return it->volatility;
+  }
+
 
 private:
 
