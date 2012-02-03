@@ -1,8 +1,9 @@
 
 #include <iostream>
 #include <fstream>
+#include <cstdlib>
 
-#include "agent.hpp"
+#include "market.hpp"
 
 using namespace oil;
 
@@ -11,67 +12,52 @@ typedef trading_rule< double > TradingRule;
 typedef moving_average_crossover< double > TradingRuleAVG;
 typedef lag_crossover< double > TradingRuleLAG;
 typedef agent< double > Agent;
-
-
-template< typename Type >
-class market
-{
-public:
-  typedef Type value_type;
-  typedef agent< value_type > agent_type;
-
-  typedef std::vector< agent_type* > container_type;
-
-  typedef typename container_type::iterator iterator;
-  typedef typename container_type::const_iterator const_iterator;
-  typedef typename container_type::reverse_iterator reverse_iterator;
-  typedef typename container_type::const_reverse_iterator const_reverse_iterator;
-
-  market ( unsigned int n ) : m_agents(n) {}
-
-  iterator begin () { return m_agents.begin(); }
-  const_iterator begin () const { return m_agents.begin(); }
-  iterator end () { return m_agents.end(); }
-  const_iterator end () const { return m_agents.end(); }
-
-  reverse_iterator rbegin () { return m_agents.rbegin(); }
-  const_reverse_iterator rbegin () const { return m_agents.rbegin(); }
-  reverse_iterator rend () { return m_agents.rend(); }
-  const_reverse_iterator rend () const { return m_agents.rend(); }
-
-  const unsigned int size() const { return m_agents.size(); }
-
-  value_type& back() { return m_agents.back().value; }
-  const value_type& back () const { return m_agents.back().value; }
-
-private:
-  std::vector< agent_type* > m_agents;
-};
-
 typedef market< double > Market;
-
-
-void blabla( Market& a )
-{
-  int positions = a.computeDemand();
-  int trade = positions;
-//  a.setCash ( 10000 );
-  double PnL = a.trade( trade );
-//  a.setCash ( 10000 );
-
-  std::cout << " posn=" << positions
-            << " trade=" << trade
-            << " PnL=" << PnL
-            << " pcPnL=" << PnL / a.getWealth() * 100.0
-            << " cash=" << a.getCash()
-            << std::endl;
-}
-
 
 int main(int argc, char *argv[])
 {
+  Market myMarket ( 10 );
 
-  TimeSeries s;
+  myMarket.setContractSize(1000);
+
+  TradingRuleLAG ruleLag(2, 8);
+  TradingRuleAVG ruleAvg(2, 8);
+
+  for ( Market::iterator it = myMarket.begin(); it != myMarket.end(); ++it)
+  {
+    Agent& a = *(*it);
+
+    double initialCash = 1000;
+    a.init(initialCash, myMarket);
+
+    double r = (double) rand() / (double) RAND_MAX;
+    if ( r < 0.5 ) a.setTradingRule( &ruleLag );
+    else a.setTradingRule( &ruleAvg );
+  }
+
+  std::ifstream prices("prices.dat");
+  std::string sdate, sprice;
+  prices >> sdate >> sprice;
+  std::cout << sdate << "  " << sprice << std::endl;
+
+  int timeLevel = 0;
+  for(;;)
+  {
+    double v;
+    prices >> sdate >> v;
+    if(prices.good()) myMarket.getOilPrice().push_back(v);
+    else break;
+
+    std::cout << "timeLevel=" << timeLevel << " " << std::endl;
+    myMarket.trade();
+
+    timeLevel++;
+    if ( timeLevel > 20 ) break;
+  }
+
+
+
+//  TimeSeries s;
 /*
   for(int i = 0; i < 100; ++i)
   {
@@ -90,7 +76,7 @@ int main(int argc, char *argv[])
   }
   return 0;
 */
-
+/*
   std::ifstream prices("prices.dat");
   std::string sdate, sprice;
   prices >> sdate >> sprice;
@@ -176,8 +162,12 @@ int main(int argc, char *argv[])
     oldPositions = positions;
     oldSewma = sewma;
     oldLewma = lewma;
-  }
 
+    myMarket.trade();
+  }
+*/
+
+  prices.close();
   return 0;
 }
 
