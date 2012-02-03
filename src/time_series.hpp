@@ -114,9 +114,8 @@ public:
     Entry e;
     e.value = v;
     typename container_type::size_type s = m_values.size();
-    const Entry &prev = m_values[s-1];
     e.volatility = (s > 0 ) ?
-                        computeVolatility(v, prev.value, prev.volatility, m_period)
+                        computeVolatility(v, m_values[s-1].value, m_values[s-1].volatility, m_period)
                       :
                         /** @todo FIXME fix this value */
                         value_type(0.3440106587);

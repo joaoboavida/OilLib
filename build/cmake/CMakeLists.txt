@@ -55,7 +55,9 @@ configure_file ( "${OILLIB_INC_DIR}/config.hpp.in" "${OILLIB_INC_DIR}/config.hpp
 
 set ( OILLIB_PUBLIC_HEADERS
     ${OILLIB_INC_DIR}/config.hpp
-    ${OILLIB_INC_DIR}/hello.hpp
+    ${OILLIB_INC_DIR}/agent.hpp
+    ${OILLIB_INC_DIR}/trading_rule.hpp
+    ${OILLIB_INC_DIR}/time_series.hpp
 )
 set ( OILLIB_PRIVATE_HEADERS 
 )
