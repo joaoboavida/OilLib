@@ -2,9 +2,8 @@
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
-
 #include <string>
-
+#include <cmath>
 #include "market.hpp"
 
 using namespace oil;
@@ -21,14 +20,14 @@ typedef std::vector< TradingRule * > ExistingRules;
 
 int main(int argc, char *argv[])
 {
-  Market myMarket ( 100 );
+  Market myMarket ( 10 );
 
   myMarket.setContractSize(1000);
 
   ExistingRules rules;
   for ( int i = 0; i < 8; ++i )
   {
-    int s = pow(2, i+1);
+    int s = pow(2.0,i+1);
     rules.push_back ( new TradingRuleLAG( s, s*2 ) );
     rules.push_back ( new TradingRuleAVG( s, s*2 ) );
   }
@@ -37,7 +36,7 @@ int main(int argc, char *argv[])
   {
     Agent& a = *(*it);
 
-    double initialCash = 1000;
+    double initialCash = 10000;
     a.init(initialCash, myMarket);
 
     int pos = rules.size() * ((double) rand() / (double) RAND_MAX);
